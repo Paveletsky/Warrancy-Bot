@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Warranty } from './warranty.entity';
+import { Users, Warranty } from './warranty.entity';
 import { WarrantyService } from './warranty.service';
 import { WarrantyController } from './warranty.controller';
-import { BotService } from '../bot/bot.service'
+import { BotModule } from '../bot/bot.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Warranty])],
-  providers: [WarrantyService, BotService],
+  imports: [TypeOrmModule.forFeature([Warranty]), TypeOrmModule.forFeature([Users]), BotModule],
+  providers: [WarrantyService],
   controllers: [WarrantyController],
 })
 export class WarrantyModule {}

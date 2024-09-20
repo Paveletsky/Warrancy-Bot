@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Telegraf, Markup } from 'telegraf';
+
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Users } from '../warranty/warranty.entity';
+
 import * as LocalSession from 'telegraf-session-local';
 import axios from 'axios';
 
@@ -11,8 +16,11 @@ export class BotService {
       { flag: '🇬🇷', code: 'GR' },
     ],
   };
-
-  constructor() {
+  
+  constructor(
+      @InjectRepository(Users)
+      private warrantyRepository: Repository<Users>,
+  ) {
     this.bot = new Telegraf(process.env.BOT_TOKEN);
 
     const localSession = new LocalSession({ database: 'session_db.json' });
@@ -32,6 +40,53 @@ export class BotService {
     return this.CFG.GEO_OPTS.map((geo) => [Markup.button.text(`${geo.flag} ${geo.code}`)]);
   }
 
+  private async handleAdminCommands(ctx: any) {
+    const text = ctx.message.text.split(' ');
+    
+    // Проверка на наличие прав
+    const user = await this.warrantyRepository.findOneBy({ id: ctx.message.from.id });
+    if (!user || !user.isAdmin) {
+        return ctx.reply('Нет прав администратора');
+    }
+    
+    const command = text[0].toLowerCase();
+
+    if (command === '/adduser') {
+        if (text.length < 2) {
+            return ctx.reply('Укажи ID');
+        }
+        
+        const newUserId = text[1];
+
+        await this.warrantyRepository.save({id: newUserId, hasAccess: true});
+        return ctx.reply(`Пользователь ${newUserId} добавлен.`);
+    } else if (command === '/setaccess') {
+        if (text.length < 2) {
+            return ctx.reply('Укажи ID');
+        }
+
+        try {
+          const userId = text[1];
+          const setAccessTo = text[2];
+  
+          // Обновление записи пользователя
+          const userToBan = await this.warrantyRepository.findOneBy({ id: userId });
+          if (!userToBan) {
+              return ctx.reply('Пользователь не найден');
+          }
+  
+          userToBan.hasAccess = setAccessTo;
+          await this.warrantyRepository.save(userToBan);
+          return ctx.reply(`Готово`);
+        } catch (err) {
+          ctx.reply('Разрешить - 1, запретить - 0')
+        }
+
+    } else {
+        return ctx.reply('Неизвестная команда');
+    }
+  }
+  
   private async handleStart(ctx: any) {
     ctx.session.formActive = false;
     ctx.session.geo = null;
@@ -39,9 +94,20 @@ export class BotService {
   }
 
   private async handleText(ctx: any) {
+    if (ctx.message.text.startsWith('/')) {
+      await this.handleAdminCommands(ctx);
+      return;
+    }
+    
     const text = ctx.message.text;
     const selectedGeo = this.CFG.GEO_OPTS.find(geo => text === `${geo.flag} ${geo.code}`);
     
+    const user = await this.warrantyRepository.findOneBy({id: ctx.message.from.id});
+    if (!user || !user.hasAccess) {
+      ctx.reply('Отказано.');
+      return;
+    }
+
     if (selectedGeo) {
       ctx.session.geo = selectedGeo.code;
       ctx.session.formActive = true;

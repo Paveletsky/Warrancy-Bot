@@ -17,3 +17,15 @@ export class Warranty {
   @Column({ type: 'text', nullable: true })
   clientName: string;
 }
+
+@Entity('warranty_users')
+export class Users{
+  @PrimaryColumn()
+  id: string;
+
+  @Column('boolean', {default: true})
+  hasAccess: boolean = true;
+  
+  @Column('boolean', {default: false})
+  isAdmin: boolean = false;
+}

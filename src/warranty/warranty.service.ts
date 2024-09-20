@@ -11,9 +11,13 @@ import * as path from 'path';
 export class WarrantyService {
   constructor(
     @InjectRepository(Warranty)
-    private warrantyRepository: Repository<Warranty>,
+    public warrantyRepository: Repository<Warranty>,
     private readonly botService: BotService,
   ) {}
+
+  async getRep() {
+    return this.warrantyRepository
+  }
 
   async generateImage(text: string[], positions: { x: number, y: number }[], geo: string, managerId: string, clientName: string) {
     try {
