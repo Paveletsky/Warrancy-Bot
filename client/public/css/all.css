@@ -1,0 +1,140 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f4f8;
+}
+
+html {
+    position: relative;
+    scroll-behavior: smooth;
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgb(201, 201, 201);
+    opacity: 0.1;
+    border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3856c2;
+    border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #1d3075;
+}
+
+.container {
+    text-align: center;
+    width: 80%;
+    max-width: 900px;
+    background: #ffffff00;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.pdf-viewer {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.signature-panel {
+    position: relative;
+}
+
+.signature-canvas {
+    border: 2px solid #e0e0e0;
+    border-radius: 60px;
+    background-color: #fff;
+    width: 50%;
+    height: 220px;
+    cursor: crosshair;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+    .signature-canvas {
+        width: 100%;
+    }
+}
+
+.signature-panel button {
+    background-color: #25a434;
+    border: none;
+    color: white;
+    margin: 5px;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.signature-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -130%);
+    font-size: 20px;
+    color: rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+}
+
+
+.signature-panel button:hover {
+    background-color: #1a8527;
+    transform: scale(1.05);
+}
+
+.signature-panel #clearSignature {
+    background-color: #8a8a8a;
+}
+
+.signature-panel #clearSignature:hover {
+    background-color: #686868;
+    transform: scale(1.05);
+}
+
+.signature-panel button:active {
+    transform: scale(0.95);
+}
+
+.signature-panel {
+    position: relative;
+    transition: opacity 1s ease-in-out;
+}
+
+.signature-panel.hidden {
+    opacity: 0;
+    display: none;
+}
+
+.ready-text {
+    font-size: 36px;
+    color: #0a972b;
+    font-weight: 600;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.ready-text.visible {
+    opacity: 1;
+    visibility: visible;
+}
