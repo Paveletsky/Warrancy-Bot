@@ -1,16 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import configuration from './config/configuration';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { WarrantyModule } from './warranty/warranty.module';
 import { FileCleanupModule } from './schedule/schedule.module';
-import { BotModule } from './bot/bot.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      load: [configuration],
-    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.DB_HOST,
@@ -23,7 +17,6 @@ import { BotModule } from './bot/bot.module';
     }),
     WarrantyModule,
     FileCleanupModule,
-    BotModule,
   ],
 })
 export class AppModule {}

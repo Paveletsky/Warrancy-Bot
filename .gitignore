@@ -1,3 +1,5 @@
+/client/public/assets/*.png
+
 # compiled output
 /dist
 /node_modules

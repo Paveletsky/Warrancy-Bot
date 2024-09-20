@@ -40,6 +40,6 @@ export class WarrantyController {
     const result = (await this.warrantyRepository.findOneBy({id: filename}))
     
     const confirmed = result.confirmed;
-    res.render('index', { filename: filename, filePath: `${process.env.API_URL}/api/warranty/assets/1726831987534`, confirmed: confirmed   });
+    res.render('index', { filename: filename, filePath: `${process.env.DOMAIN_URL}/api/warranty/assets/${filename}`, confirmed: confirmed   });
   }
 }

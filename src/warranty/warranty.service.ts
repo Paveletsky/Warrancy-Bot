@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { createCanvas, loadImage } from 'canvas';
 import { Warranty } from './warranty.entity';
+import { BotService } from '../bot/bot.service'
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,6 +12,7 @@ export class WarrantyService {
   constructor(
     @InjectRepository(Warranty)
     private warrantyRepository: Repository<Warranty>,
+    private readonly botService: BotService,
   ) {}
 
   async generateImage(text: string[], positions: { x: number, y: number }[], geo: string, managerId: string, clientName: string) {
@@ -72,10 +74,14 @@ export class WarrantyService {
     try {
       const base64Data = imageData.replace(/^data:image\/png;base64,/, "");
       const filePath = path.join(__dirname, `/../../client/public/assets/${filename}`);
+      const warranty = await this.warrantyRepository.findOneBy({ id: filename.replace('.png', '') });
 
-      console.log(filePath)
       fs.writeFileSync(filePath, base64Data, 'base64');
-      
+
+      if (warranty) {
+        await this.botService.sendImageToManager(warranty.managerId, filePath, warranty.clientName);
+      }
+
       return { message: 'Image saved successfully', filePath };
     } catch (error) {
       throw new HttpException('Failed to save image', HttpStatus.INTERNAL_SERVER_ERROR);

@@ -23,6 +23,10 @@ export class BotService {
     
     this.bot.launch();
   }
+  
+  async sendImageToManager(managerId: string, filePath: string, clientName: string) {
+    await this.bot.telegram.sendPhoto(managerId, { source: filePath }, { caption: clientName });
+  }
 
   private generateGeoKeyboard() {
     return this.CFG.GEO_OPTS.map((geo) => [Markup.button.text(`${geo.flag} ${geo.code}`)]);
@@ -97,7 +101,7 @@ export class BotService {
           });
 
           await ctx.reply('Ссылка готова 👇');
-          await ctx.reply(`${process.env.API_URL}/warranty/${response.data.url}`, Markup.keyboard(this.generateGeoKeyboard()).resize().oneTime());
+          await ctx.reply(`${process.env.DOMAIN_URL}/api/warranty/${response.data.url}`, Markup.keyboard(this.generateGeoKeyboard()).resize().oneTime());
         } catch (error) {
           await ctx.reply(`Ошибка: ${error.message}`);
         }
