@@ -1,12 +1,17 @@
+import * as LS from 'telegraf-session-local';
+import axios from 'axios';
+
 import { Injectable } from '@nestjs/common';
-import { Markup, Context } from 'telegraf';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Users } from '../warranty/warranty.entity';
-import { InjectBot, Start, Update, On, Ctx } from 'nestjs-telegraf';
+import { Markup, Context } from 'telegraf';
 import { Telegraf } from 'telegraf';
-import * as LocalSession from 'telegraf-session-local';
-import axios from 'axios';
+import { Users } from '../warranty/warranty.entity';
+
+import { 
+  InjectBot, Start, 
+  Update, On, Ctx 
+} from 'nestjs-telegraf';
 
 @Update()
 @Injectable()
@@ -24,7 +29,7 @@ export class BotService {
   )
   
   {
-    const localSession = new LocalSession({ database: 'session_db.json' });
+    const localSession = new LS({ database: 'session_db.json' });
     this.bot.use(localSession.middleware());
   }
 
