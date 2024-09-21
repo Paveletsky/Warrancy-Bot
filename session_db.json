@@ -4,7 +4,14 @@
       "id": "788543863:788543863",
       "data": {
         "geo": "GR",
-        "formActive": true
+        "formActive": false
+      }
+    },
+    {
+      "id": "428075669:428075669",
+      "data": {
+        "formActive": false,
+        "geo": "GR"
       }
     }
   ]

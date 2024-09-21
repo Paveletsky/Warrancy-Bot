@@ -1,5 +1,4 @@
 /client/public/assets/*.png
-session_db.json
 
 # compiled output
 /dist
