@@ -1,37 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { Telegraf, Markup } from 'telegraf';
-
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Users } from '../warranty/warranty.entity';
-
-import * as LocalSession from 'telegraf-session-local';
+import * as LS from 'telegraf-session-local';
 import axios from 'axios';
 
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Markup, Context } from 'telegraf';
+import { Telegraf } from 'telegraf';
+import { Users } from '../warranty/warranty.entity';
+
+import { 
+  InjectBot, Start, 
+  Update, On, Ctx 
+} from 'nestjs-telegraf';
+
+@Update()
 @Injectable()
 export class BotService {
-  private bot: Telegraf;
+
   private readonly CFG = {
     GEO_OPTS: [
       { flag: '🇬🇷', code: 'GR' },
     ],
   };
-  
-  constructor(
-      @InjectRepository(Users)
-      private warrantyRepository: Repository<Users>,
-  ) {
-    this.bot = new Telegraf(process.env.BOT_TOKEN);
 
-    const localSession = new LocalSession({ database: 'session_db.json' });
+  constructor (
+    @InjectRepository(Users) private warrantyRepository: Repository<Users>,
+    @InjectBot() private readonly bot: Telegraf<Context>,
+  )
+  
+  {
+    const localSession = new LS({ database: 'session_db.json' });
     this.bot.use(localSession.middleware());
-
-    this.bot.start((ctx) => this.handleStart(ctx));
-    this.bot.on('text', (ctx) => this.handleText(ctx));
-    
-    this.bot.launch();
   }
-  
+
   async sendImageToManager(managerId: string, filePath: string, clientName: string) {
     await this.bot.telegram.sendPhoto(managerId, { source: filePath }, { caption: clientName });
   }
@@ -42,67 +43,68 @@ export class BotService {
 
   private async handleAdminCommands(ctx: any) {
     const text = ctx.message.text.split(' ');
-    
+
     // Проверка на наличие прав
     const user = await this.warrantyRepository.findOneBy({ id: ctx.message.from.id });
     if (!user || !user.isAdmin) {
-        return ctx.reply('Нет прав администратора');
+      return ctx.reply('Нет прав администратора');
     }
-    
+
     const command = text[0].toLowerCase();
 
     if (command === '/adduser') {
-        if (text.length < 2) {
-            return ctx.reply('Укажи ID');
-        }
-        
-        const newUserId = text[1];
+      if (text.length < 2) {
+        return ctx.reply('Укажи ID');
+      }
 
-        await this.warrantyRepository.save({id: newUserId, hasAccess: true});
-        return ctx.reply(`Пользователь ${newUserId} добавлен.`);
+      const newUserId = text[1];
+
+      await this.warrantyRepository.save({ id: newUserId, hasAccess: true });
+      return ctx.reply(`Пользователь ${newUserId} добавлен.`);
     } else if (command === '/setaccess') {
-        if (text.length < 2) {
-            return ctx.reply('Укажи ID');
+      if (text.length < 2) {
+        return ctx.reply('Укажи ID');
+      }
+
+      try {
+        const userId = text[1];
+        const setAccessTo = text[2];
+
+        // Обновление записи пользователя
+        const userToBan = await this.warrantyRepository.findOneBy({ id: userId });
+        if (!userToBan) {
+          return ctx.reply('Пользователь не найден');
         }
 
-        try {
-          const userId = text[1];
-          const setAccessTo = text[2];
-  
-          // Обновление записи пользователя
-          const userToBan = await this.warrantyRepository.findOneBy({ id: userId });
-          if (!userToBan) {
-              return ctx.reply('Пользователь не найден');
-          }
-  
-          userToBan.hasAccess = setAccessTo;
-          await this.warrantyRepository.save(userToBan);
-          return ctx.reply(`Готово`);
-        } catch (err) {
-          ctx.reply('Разрешить - 1, запретить - 0')
-        }
-
+        userToBan.hasAccess = setAccessTo;
+        await this.warrantyRepository.save(userToBan);
+        return ctx.reply('Готово');
+      } catch (err) {
+        ctx.reply('Разрешить - 1, запретить - 0');
+      }
     } else {
-        return ctx.reply('Неизвестная команда');
+      return ctx.reply('Неизвестная команда');
     }
   }
-  
-  private async handleStart(ctx: any) {
+
+  @Start()
+  async handleStart(@Ctx() ctx: any) {
     ctx.session.formActive = false;
     ctx.session.geo = null;
     await ctx.reply('Выбери гео 👇', Markup.keyboard(this.generateGeoKeyboard()).resize().oneTime());
   }
 
-  private async handleText(ctx: any) {
+  @On('text')
+  async handleText(@Ctx() ctx: any) {
     if (ctx.message.text.startsWith('/')) {
       await this.handleAdminCommands(ctx);
       return;
     }
-    
+
     const text = ctx.message.text;
-    const selectedGeo = this.CFG.GEO_OPTS.find(geo => text === `${geo.flag} ${geo.code}`);
-    
-    const user = await this.warrantyRepository.findOneBy({id: ctx.message.from.id});
+    const selectedGeo = this.CFG.GEO_OPTS.find((geo) => text === `${geo.flag} ${geo.code}`);
+
+    const user = await this.warrantyRepository.findOneBy({ id: ctx.message.from.id });
     if (!user || !user.hasAccess) {
       ctx.reply('Отказано.');
       return;
@@ -130,10 +132,7 @@ export class BotService {
     } else if (ctx.session.formActive) {
       const data = ctx.message.text.split('\n');
       if (data.length >= 9) {
-        const [
-          created_on, exists_in, exists_in_2, hero_1, 
-          hero_2, hero_3, client_name, to_pay, salary
-        ] = data;
+        const [created_on, exists_in, exists_in_2, hero_1, hero_2, hero_3, client_name, to_pay, salary] = data;
 
         try {
           const response = await axios.post(`${process.env.API_URL}/api/generate`, {
@@ -141,8 +140,8 @@ export class BotService {
             client_name: salary,
             text: [
               '40012121988',
-              created_on, 
-              exists_in, 
+              created_on,
+              exists_in,
               exists_in_2,
               hero_1,
               hero_2,
@@ -155,7 +154,7 @@ export class BotService {
               { x: 737, y: 840 },
               { x: 737, y: 900 },
               { x: 737, y: 960 },
-              { x: 737, y: 1020 },                        
+              { x: 737, y: 1020 },
               { x: 420, y: 1455 },
               { x: 360, y: 1570 },
               { x: 785, y: 1630 },
@@ -180,4 +179,5 @@ export class BotService {
       await ctx.reply('Сначала выбери ГЕО');
     }
   }
+
 }
