@@ -29,7 +29,7 @@
 ## Project setup
 
 ```bash
-$ docker-compose up
+$ docker-compose up --build
 ```
 Таблица ГЕО находится в `bot/bot.service.ts >> class BotService >> private readonly CFG`
 
