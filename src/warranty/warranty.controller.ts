@@ -39,6 +39,11 @@ export class WarrantyController {
   async getWarranty(@Param('filename') filename: string, @Res() res: Response) {
     const result = (await this.warrantyRepository.findOneBy({id: filename}))
     
+    if (!result) {
+      res.render('404')
+      return;
+    }
+    
     const confirmed = result.confirmed;
     res.render('index', { filename: filename, filePath: `${process.env.DOMAIN_URL}/api/warranty/assets/${filename}`, confirmed: confirmed   });
   }
