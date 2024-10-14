@@ -33,6 +33,19 @@ $ docker-compose up --build
 ```
 Таблица ГЕО находится в `bot/bot.service.ts >> class BotService >> private readonly CFG`
 
+## ENV Conf
+- `BOT_TOKEN`: API токен телеграм бота
+- `API_URL`: Адрес для API между ботом и веб-частью (localhost по стандарту)
+- `DOMAIN_URL`: Домен общего доступа к веб-сервису
+- `APP_PORT`: Порт к веб-приложению
+
+- `DP_PORT`: Порт к базе данных
+- `DB_HOST`: Адрес хоста базы данных
+- `DB_USER`: Имя пользователя для подключения к базе данных
+- `DB_PASSWORD`: Пароль для доступа к базе данных
+- `DB_NAME`: Имя базы данных
+
+
 ## Compile and run the project
 
 ```bash
