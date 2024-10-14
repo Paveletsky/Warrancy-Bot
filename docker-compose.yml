@@ -5,13 +5,13 @@ services:
     container_name: node_app
     working_dir: /usr/src/app
     volumes:
-      - ./:/usr/src/app
+      - ./client/public/assets:/usr/src/app/client/public/assets
     ports:
       - "${APP_PORT}:3000"
     env_file:
       - .env
     depends_on:
-      - db  
+      - db
       
   db:
     image: mysql

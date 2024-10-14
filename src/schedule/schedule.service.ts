@@ -38,7 +38,7 @@ export class FileCleanupService {
 
           this.logger.log(`Файл ${file} имеет возраст: ${age.toFixed(2)} дней`);
 
-          if (age >= 0.0) { // старше одного дня
+          if (age >= 0.6) { // старше одного дня
             await fs.unlink(filePath);
 
             let tmpPath = file.replace(".png", "")
