@@ -37,13 +37,20 @@ export class WarrantyService {
 
       ctx.fillStyle = '#000000';
       ctx.font = 'bold 34px "Times New Roman"';            
-
-      positions.forEach((pos, index) => {
-        if (index > 3) {
-          ctx.font = 'italic 34px "Times New Roman"'; 
-        }
-
-        ctx.fillText(text[index] || '', pos.x, pos.y);
+      
+      fs.readFile('positions.json', 'utf8', (err, data) => {
+          if (err) {
+              return console.error({ error: 'Error reading positions' });
+          }
+          
+          let geoPos = JSON.parse(data)
+          geoPos[geo].forEach((pos, index) => {
+            if (index > 3) {
+              ctx.font = 'italic 34px "Times New Roman"'; 
+            }
+    
+            ctx.fillText(text[index] || '', pos.x, pos.y);
+          });      
       });
 
       const id = Date.now();

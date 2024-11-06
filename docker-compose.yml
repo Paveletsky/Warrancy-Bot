@@ -6,6 +6,8 @@ services:
     working_dir: /usr/src/app
     volumes:
       - ./client/public/assets:/usr/src/app/client/public/assets
+      - ./client/views:/usr/src/app/client/views
+
     ports:
       - "${APP_PORT}:3000"
     env_file:

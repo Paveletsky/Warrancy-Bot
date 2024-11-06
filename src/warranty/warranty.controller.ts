@@ -29,6 +29,11 @@ export class WarrantyController {
     return this.warrantyService.saveImage(body.imageData, body.filename);
   }
 
+  @Get('editor')
+  async editor(@Res() res: Response) {
+    res.render('editor');
+  }
+
   @Get('warranty/assets/:filename')
   async getImage(@Param('filename') filename: string, @Res() res: Response) {
     const filePath = path.join(__dirname, `/../../client/public/assets/${filename}.png`);

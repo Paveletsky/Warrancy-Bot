@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warranty Position Selector</title>
+  <style>
+    .container {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      margin-top: 20px;
+    }
+
+    .image-container {
+      position: relative;
+      border: 1px solid #ccc;
+    }
+
+    #warrantyImage {
+      max-width: 600px;
+      cursor: crosshair;
+    }
+
+    .position-marker {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .controls {
+      margin-left: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="image-container">
+      <img id="warrantyImage" src="client/public/assets/dummy/GR.PNG" alt="Warranty Image">
+    </div>
+    <div class="controls">
+      <h3>Select Position</h3>
+      <select id="positionSelector">
+        <option value="position1">Position 1</option>
+        <option value="position2">Position 2</option>
+      </select>
+      <button id="confirmButton">Confirm Position</button>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const warrantyImage = document.getElementById('warrantyImage');
+      const positionSelector = document.getElementById('positionSelector');
+      const confirmButton = document.getElementById('confirmButton');
+
+      let selectedPosition = positionSelector.value;
+      let positionCoords = {};
+
+      positionSelector.addEventListener('change', (event) => {
+        selectedPosition = event.target.value;
+      });
+
+      warrantyImage.addEventListener('click', (event) => {
+        const rect = warrantyImage.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+
+        positionCoords[selectedPosition] = { x, y };
+
+        const existingMarker = document.querySelector(`.position-marker[data-position="${selectedPosition}"]`);
+        if (existingMarker) existingMarker.remove();
+
+        const marker = document.createElement('div');
+        marker.classList.add('position-marker');
+        marker.style.left = `${x}px`;
+        marker.style.top = `${y}px`;
+        marker.dataset.position = selectedPosition;
+
+        document.querySelector('.image-container').appendChild(marker);
+      });
+
+      confirmButton.addEventListener('click', () => {
+        console.log('Position Coordinates:', positionCoords);
+      });
+    });
+  </script>
+</body>
+
+</html>
