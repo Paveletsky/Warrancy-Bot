@@ -20,7 +20,17 @@ export class BotService {
   private readonly CFG = {
     GEO_OPTS: [
       { flag: '🇬🇷', code: 'GR' },
-    ],
+      { flag: '🇩🇪', code: 'DE' },
+      { flag: '🇬🇧', code: 'EN' },
+      { flag: '🇮🇱', code: 'IL' },
+      { flag: '🇭🇷', code: 'HR' },
+      { flag: '🇮🇹', code: 'IT' },
+      { flag: '🇳🇱', code: 'NL' },
+      { flag: '🇳🇴', code: 'NO' },
+      { flag: '🇷🇴', code: 'RO' },
+      { flag: '🇸🇮', code: 'SI' },
+      { flag: '🇸🇪', code: 'SE' }
+    ]    
   };
 
   constructor (
@@ -139,7 +149,7 @@ export class BotService {
             manager_id: ctx.message.from.id,
             client_name: salary,
             text: [
-              '40012121988',
+              '',
               created_on,
               exists_in,
               exists_in_2,

@@ -25,7 +25,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: root
     ports:
-    - "3306:3306"
+    - "3309:3306"
 
 volumes:
   warranty_data:

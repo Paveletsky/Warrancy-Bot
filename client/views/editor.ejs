@@ -1,94 +1,208 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Warranty Position Selector</title>
+  <title>Редактор позиций на изображении</title>
   <style>
     .container {
       display: flex;
-      justify-content: space-around;
       align-items: flex-start;
       margin-top: 20px;
     }
-
+    .controls {
+      margin-right: 20px;
+    }
     .image-container {
       position: relative;
       border: 1px solid #ccc;
+      display: inline-block;
     }
-
     #warrantyImage {
       max-width: 600px;
       cursor: crosshair;
+      z-index: 1;
     }
-
     .position-marker {
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 4px;
+      height: 4px;
       background-color: red;
       border-radius: 50%;
       transform: translate(-50%, -50%);
     }
+    .line {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .vertical-line {
+      width: 1px;
+      height: 100%;
+    }
+    .horizontal-line {
+      height: 1px;
+      width: 100%;
+    }
 
-    .controls {
-      margin-left: 20px;
+    .coordinates {
+      position: absolute;
+      color: white;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+      pointer-events: none;
+      z-index: 3;
     }
   </style>
 </head>
-
 <body>
   <div class="container">
-    <div class="image-container">
-      <img id="warrantyImage" src="client/public/assets/dummy/GR.PNG" alt="Warranty Image">
-    </div>
     <div class="controls">
-      <h3>Select Position</h3>
-      <select id="positionSelector">
-        <option value="position1">Position 1</option>
-        <option value="position2">Position 2</option>
+      <h3>Выберите изображение</h3>
+      <select id="imageSelector">
+        <option value="GR">Греция</option>
+        <option value="DE">Германия</option>
+        <option value="EN">Английский</option>
+        <option value="IL">Иврит</option>
+        <option value="HR">Хорватия</option>
+        <option value="IT">Италия</option>
+        <option value="NL">Нидерланды</option>
+        <option value="NO">Норвегия</option>
+        <option value="RO">Румыния</option>
+        <option value="SI">Словения</option>
+        <option value="SE">Швеция</option>        
       </select>
-      <button id="confirmButton">Confirm Position</button>
+      
+      <h3>Выберите позицию</h3>
+      <select id="positionSelector">
+        <option value="BrokerName">Имя брокера 1</option>
+        <option value="SignDate1">Дата подписания 1</option>
+        <option value="ExpDate">Срок гарантии</option>
+
+        <option value="BrokerName2">Имя брокера 2</option>
+        <option value="InvestSum">Сумма вложения</option>
+        <option value="ToPay">Сумма заработка</option>
+        <option value="LeadName2">Имя лида 1</option>
+        <option value="SignDate2">Дата подписания 2</option>
+        <option value="LeadName3">Имя лида 2</option>
+      </select>
+      
+      <h3>Введите координаты</h3>
+      <input type="text" id="positionInput" placeholder="Введите координаты (x, y)">
+      <button id="setPositionButton">Установить позицию</button>
+      <button id="clearPositionButton">Очистить позицию</button>
+      <button id="confirmButton">Подтвердить позиции</button>
+    </div>
+    
+    <div class="image-container">
+      <img id="warrantyImage" src="https://docs.warranties-imparted.click/api/warranty/dummy/GR" alt="Изображение">
+      <div class="line vertical-line" id="verticalLine"></div>
+      <div class="line horizontal-line" id="horizontalLine"></div>
+      <div id="coordinates" class="coordinates">x: 0, y: 0</div>
     </div>
   </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const warrantyImage = document.getElementById('warrantyImage');
+      const imageSelector = document.getElementById('imageSelector');
       const positionSelector = document.getElementById('positionSelector');
+      const positionInput = document.getElementById('positionInput');
+      const setPositionButton = document.getElementById('setPositionButton');
+      const clearPositionButton = document.getElementById('clearPositionButton');
       const confirmButton = document.getElementById('confirmButton');
+      const verticalLine = document.getElementById('verticalLine');
+      const horizontalLine = document.getElementById('horizontalLine');
+      const coordinatesDisplay = document.getElementById('coordinates');
 
-      let selectedPosition = positionSelector.value;
       let positionCoords = {};
 
-      positionSelector.addEventListener('change', (event) => {
-        selectedPosition = event.target.value;
+      let _rect, _scaleX, _scaleY
+      
+      imageSelector.addEventListener('change', () => {
+        const selectedImage = imageSelector.value;
+        warrantyImage.src = `https://docs.warranties-imparted.click/api/warranty/dummy/${selectedImage}`;
       });
 
-      warrantyImage.addEventListener('click', (event) => {
+      warrantyImage.addEventListener('mousemove', (event) => {
         const rect = warrantyImage.getBoundingClientRect();
         const x = event.clientX - rect.left;
         const y = event.clientY - rect.top;
 
+        _scaleX = warrantyImage.naturalWidth / rect.width;
+        _scaleY = warrantyImage.naturalHeight / rect.height;
+        
+        const _x = Math.round((event.clientX - rect.left) * _scaleX);
+        const _y = Math.round((event.clientY - rect.top) * _scaleY);
+
+        verticalLine.style.left = `${x}px`;
+        horizontalLine.style.top = `${y}px`;
+
+        coordinatesDisplay.textContent = `x: ${_x}, y: ${_y}`;
+        coordinatesDisplay.style.left = `${x + 10}px`;
+        coordinatesDisplay.style.top = `${y + 10}px`;
+      });
+
+      warrantyImage.addEventListener('click', (event) => {
+        const rect = warrantyImage.getBoundingClientRect();
+        const scaleX = warrantyImage.naturalWidth / rect.width;
+        const scaleY = warrantyImage.naturalHeight / rect.height;
+        
+        const x = Math.round((event.clientX - rect.left) * scaleX);
+        const y = Math.round((event.clientY - rect.top) * scaleY);
+        const selectedPosition = positionSelector.value;
+
         positionCoords[selectedPosition] = { x, y };
 
-        const existingMarker = document.querySelector(`.position-marker[data-position="${selectedPosition}"]`);
-        if (existingMarker) existingMarker.remove();
+        addMarker(x, y, selectedPosition);
+      });
 
-        const marker = document.createElement('div');
-        marker.classList.add('position-marker');
-        marker.style.left = `${x}px`;
-        marker.style.top = `${y}px`;
-        marker.dataset.position = selectedPosition;
+      setPositionButton.addEventListener('click', () => {
+        const selectedPosition = positionSelector.value;
+        const [x, y] = positionInput.value.split(',').map(coord => parseInt(coord.trim(), 10));
+        
+        if (!isNaN(x) && !isNaN(y)) {
+          positionCoords[selectedPosition] = { x, y };
+          addMarker(x, y, selectedPosition);
+        } else {
+          alert('Формат x, y');
+        }
+      });
 
-        document.querySelector('.image-container').appendChild(marker);
+      clearPositionButton.addEventListener('click', () => {
+        const selectedPosition = positionSelector.value;
+        delete positionCoords[selectedPosition];
+
+        const marker = document.querySelector(`.position-marker[data-position="${selectedPosition}"]`);
+        if (marker) marker.remove();
       });
 
       confirmButton.addEventListener('click', () => {
-        console.log('Position Coordinates:', positionCoords);
+        console.log('Координаты позиций:', positionCoords);
       });
+
+      function addMarker(x, y, selectedPosition) {
+        const rect = warrantyImage.getBoundingClientRect();
+        const displayX = x * rect.width / warrantyImage.naturalWidth;
+        const displayY = y * rect.height / warrantyImage.naturalHeight;
+
+        let marker = document.querySelector(`.position-marker[data-position="${selectedPosition}"]`);
+        if (marker) {
+          marker.style.left = `${displayX}px`;
+          marker.style.top = `${displayY}px`;
+        } else {
+          marker = document.createElement('div');
+          marker.classList.add('position-marker');
+          marker.style.left = `${displayX}px`;
+          marker.style.top = `${displayY}px`;
+          marker.dataset.position = selectedPosition;
+          document.querySelector('.image-container').appendChild(marker);
+        }
+      }
     });
   </script>
 </body>
-
 </html>

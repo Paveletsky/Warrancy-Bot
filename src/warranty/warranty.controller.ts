@@ -40,6 +40,12 @@ export class WarrantyController {
     res.sendFile(filePath)
   }
 
+  @Get('warranty/dummy/:filename')
+  async getDummy(@Param('filename') filename: string, @Res() res: Response) {
+    const filePath = path.join(__dirname, `/../../client/public/assets/dummy/${filename}.PNG`);
+    res.sendFile(filePath)
+  }
+
   @Get('warranty/:filename')
   async getWarranty(@Param('filename') filename: string, @Res() res: Response) {
     const result = (await this.warrantyRepository.findOneBy({id: filename}))
