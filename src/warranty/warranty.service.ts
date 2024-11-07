@@ -46,7 +46,13 @@ export class WarrantyService {
           let geoPos = JSON.parse(data)
           geoPos[geo].forEach((pos, index) => {
             if (index > 3) {
-              ctx.font = 'italic 34px "Times New Roman"'; 
+              ctx.font = 'italic 34px "Times New Roman"';
+
+              if (geo === 'IL') {
+                ctx.textAlign = 'right'
+              }
+            } else {
+              ctx.textAlign = 'left'
             }
     
             ctx.fillText(text[index] || '', pos.x, pos.y);
