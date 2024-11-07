@@ -57,7 +57,7 @@ z
     const text = ctx.message.text.split(' ');
 
     // Проверка на наличие прав
-    const user = await this.warrantyRepository.findOneBy({ id: `${ctx.message.from.username}` });
+    const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
     if (!user || !user.isAdmin) {
       return ctx.reply('Нет прав администратора');
     }
@@ -117,15 +117,14 @@ z
     const selectedGeo = this.CFG.GEO_OPTS.find((geo) => text === `${geo.flag} ${geo.code}`);
 
     if (text === 'добавь') {
-      fs.readFile('users.txt', 'utf8', (err, data) => {
+      fs.readFile('users.json', 'utf8', (err, data) => {
         if (err) {
             console.error("Ошибка чтения файла:", err);
             return;
         }
     
-        const users = data.split('\n');
-    
-        users.forEach(async user => {
+        let users = JSON.parse(data)
+        users["op"].forEach(async user => {
           await this.warrantyRepository.save({ id: user, hasAccess: true });
         });
 
@@ -133,7 +132,8 @@ z
       });
     }
 
-    const user = await this.warrantyRepository.findOneBy({ id: `${ctx.message.from.username}` });
+    const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
+    console.log(user)
     if (!user || !user.hasAccess) {
       ctx.reply('Отказано.');
       return;
