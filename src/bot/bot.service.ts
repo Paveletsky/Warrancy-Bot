@@ -57,7 +57,7 @@ z
     const text = ctx.message.text.split(' ');
 
     // Проверка на наличие прав
-    const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
+    const user = await this.warrantyRepository.findOneBy({ id: `${ctx.message.from.username}` });
     if (!user || !user.isAdmin) {
       return ctx.reply('Нет прав администратора');
     }
@@ -133,7 +133,7 @@ z
       });
     }
 
-    const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
+    const user = await this.warrantyRepository.findOneBy({ id: `${ctx.message.from.username}` });
     if (!user || !user.hasAccess) {
       ctx.reply('Отказано.');
       return;
