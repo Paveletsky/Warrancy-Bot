@@ -49,10 +49,10 @@ export class WarrantyService {
               ctx.font = 'italic 34px "Times New Roman"';
 
               if (geo === 'IL') {
-                ctx.textAlign = 'right'
+                ctx.textAlign = 'left'
               }
             } else {
-              ctx.textAlign = 'left'
+              ctx.textAlign = 'right'
             }
     
             ctx.fillText(text[index] || '', pos.x, pos.y);
