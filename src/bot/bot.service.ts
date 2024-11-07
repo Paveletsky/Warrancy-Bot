@@ -8,6 +8,8 @@ import { Markup, Context } from 'telegraf';
 import { Telegraf } from 'telegraf';
 import { Users } from '../warranty/warranty.entity';
 
+import * as fs from 'fs';
+
 import { 
   InjectBot, Start, 
   Update, On, Ctx 
@@ -50,12 +52,12 @@ export class BotService {
   private generateGeoKeyboard() {
     return this.CFG.GEO_OPTS.map((geo) => [Markup.button.text(`${geo.flag} ${geo.code}`)]);
   }
-
+z
   private async handleAdminCommands(ctx: any) {
     const text = ctx.message.text.split(' ');
 
     // Проверка на наличие прав
-    const user = await this.warrantyRepository.findOneBy({ id: ctx.message.from.id });
+    const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
     if (!user || !user.isAdmin) {
       return ctx.reply('Нет прав администратора');
     }
@@ -114,7 +116,24 @@ export class BotService {
     const text = ctx.message.text;
     const selectedGeo = this.CFG.GEO_OPTS.find((geo) => text === `${geo.flag} ${geo.code}`);
 
-    const user = await this.warrantyRepository.findOneBy({ id: ctx.message.from.id });
+    if (text === 'добавь') {
+      fs.readFile('users.txt', 'utf8', (err, data) => {
+        if (err) {
+            console.error("Ошибка чтения файла:", err);
+            return;
+        }
+    
+        const users = data.split('\n');
+    
+        users.forEach(async user => {
+          await this.warrantyRepository.save({ id: user, hasAccess: true });
+        });
+
+        console.log("Отдел добавлен")
+      });
+    }
+
+    const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
     if (!user || !user.hasAccess) {
       ctx.reply('Отказано.');
       return;
