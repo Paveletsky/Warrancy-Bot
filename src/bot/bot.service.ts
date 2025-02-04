@@ -31,7 +31,11 @@ export class BotService {
       { flag: '🇳🇴', code: 'NO' },
       { flag: '🇷🇴', code: 'RO' },
       { flag: '🇸🇮', code: 'SI' },
-      { flag: '🇸🇪', code: 'SE' }
+      { flag: '🇸🇪', code: 'SE' },
+      { flag: '🇦🇲', code: 'AM' },
+      { flag: '🇭🇺', code: 'HU' },
+      { flag: '🇵🇹', code: 'PT' },
+      { flag: '🇫🇷', code: 'FR' }
     ]    
   };
 
@@ -133,9 +137,13 @@ z
     }
 
     const user = await this.warrantyRepository.findOneBy({ id: `@${ctx.message.from.username}` });
-    console.log(user)
     if (!user || !user.hasAccess) {
       ctx.reply('Отказано.');
+      return;
+    }
+
+    if (process.env.TECH_WORKS == "True" && !user.isAdmin) {
+      ctx.reply('⚠️ Технические работы, бот недоступен.')
       return;
     }
 
@@ -155,7 +163,7 @@ z
 6. Сумма заработка (пример: 1120 eur)
 7. Имя Лида (пример: Adam Smasher)
 8. Действует до (пример: 18.12.2023)
-9. Имя Лида (пример: Adam Smasher)
+9. Имя Героя (пример: Johny Silverhand)
         `,
       });
     } else if (ctx.session.formActive) {
